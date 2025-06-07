@@ -1,0 +1,23 @@
+{
+  "name": "lucas11-bot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon index.js",
+    "run": "node index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@slack/bolt": "^4.4.0",
+    "@slack/web-api": "^7.9.2",
+    "dotenv": "^16.5.0",
+    "pokeapi-js-wrapper": "^1.2.8",
+    "pokedex-promise-v2": "^4.2.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
+}
