@@ -218,6 +218,117 @@ catch (error) {
   await say("So that just happen :ferris-explode:.\nContact Lucas11 about this.");
 }
 });
+
+app.command('/demonlist-player', async ({ command, ack, say }) => {
+  await ack();
+
+  const player = command.text.trim();
+
+  try {
+    const response = await fetch(`https://pointercrate.com/api/v1/players?name_contains=${player}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      await say(`No player in the demon list called "${player}" :sad:`);
+      return;
+    }
+    const data = await response.json()
+    if (!data.length) {
+      await say(`No player in the demon list called "${player}" :sad:`);
+      return;
+    }
+    const rank = data[0].rank;
+    const blocks = data.slice(0, 5).map((p) => ({
+      type: "section",
+      text: {
+        type: "mrkdwn",
+        text: `*${p.name}* (Rank: ${p.rank})`
+      },
+      accessory: {
+        type: "button",
+        text: {
+          type: "plain_text",
+          text: "See details"
+        },
+        value: String(p.id),
+        action_id: "select_demon_player"
+      }
+    }));
+    await say({
+      text: `Select the player called "${player}"`,
+      blocks: [
+        {
+          type: "header",
+          text: {
+            type: "plain_text",
+            text: `Players founded: "${player}"`
+          }
+        },
+        ...blocks
+      ]
+    });
+}
+catch (error) {
+  console.error(error);
+  await say("So that just happen :ferris-explode:.\nContact Lucas11 about this.");
+}
+});
+
+app.action("select_demon_player", async ({ body, ack, client }) => {
+  await ack();
+
+  const playerId = body.actions[0].value;
+  console.log(playerId)
+  try {
+    const response = await fetch(`https://pointercrate.com/api/v1/players/${playerId}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json"
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch player with ID ${playerId}`);
+    }
+
+    const data = await response.json();
+
+
+    const id = data.data.id;
+    const name = data.data.name;
+    const nationality = data.data.nationality?.nation ?? "Unknown";
+    const rank = data.data.rank;
+    const displayrank = rank !== null && rank !== undefined;
+    const banned = data.data.banned ? "Yes" : "No" ;
+
+    await client.chat.postMessage({
+      channel: body.channel.id,
+      text: `Player Info: ${name}`,
+      blocks: [
+        {
+          type: "section",
+          text: {
+            type: "mrkdwn",
+            text: `*Name:* ${name}\n*Demon List ID:* ${id}\n*Nationality:* ${nationality}\n*Rank:* ${displayrank}\n*Banned:* ${banned}`
+          }
+        }
+      ]
+    });
+
+  } catch (error) {
+    console.error("Cuando sienta el boom", error);
+    await client.chat.postMessage({
+      channel: body.channel.id,
+      text: "So that just happen :ferris-explode:.\nContact Lucas11 about this."
+    });
+  }
+});
+
+
 app.command('/pokemon-berries', async ({   command, ack, say }) => {
   await ack();
 
