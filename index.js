@@ -237,18 +237,14 @@ app.command('/aredl-level', async ({ command, ack, say }) => {
       return;
     }
     const data = await response.json()
-    if (!data.length) {
-      await say(`No level in the AREDL with the ID "${levelid}" :sad:`);
-      return;
-    }
     const name = data.name;
     const requirement = data.requirement;
-    const video = data.verifications.video_url;
+    const video = data.verifications[0].video_url;
     const position = data.position;
-    const verifier = data.verifications.submitted_by.global_name;
+    const verifier = data.verifications[0].submitted_by.global_name;
     const creator = data.publisher.global_name;
-    const created = data.verifications.created_at;
-    const mobile = data.verifications.mobile;
+    const created = data.verifications[0].created_at;
+    const mobile = data.verifications[0].mobile;
     const points = data.points;
     const twoplayer = data.two_player;
     const description = data.description;
@@ -269,7 +265,7 @@ app.command('/aredl-level', async ({ command, ack, say }) => {
 }
 catch (error) {
   console.error(error);
-  await say("So that just happen :ferris-explode:.\nContact Lucas11 about this.");
+  await say("So that just happen :ferris-explode:.\nCheck the ID of the level maybe?\nIf you are sure this is a mistake contact Lucas11.");
 }
 });
 
@@ -279,36 +275,33 @@ app.command('/aredl-player', async ({ command, ack, say }) => {
   const player = command.text.trim();
 
   try {
-    const leaderboardresponse = await fetch(`https://api.aredl.net/v2/api/aredl/leaderboard/${player}`, {
+    const leaderboardresponse = await fetch(`https://api.aredl.net/v2/api/aredl/leaderboard?name_filter=${player}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
       },
     });
-    const userresponse = await fetch(`https://api.aredl.net/v2/api/users/${player}`, {
+    const userresponse = await fetch(`https://api.aredl.net/v2/api/users?name_filter=${player}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
       },
     });
-
-
+    const leaderboarddata = await leaderboardresponse.json()
+    const userdata = await userresponse.json()
     if (!leaderboardresponse.ok) {
       await say(`No Player in the AREDL with the name "${player}" :sad:`);
       return;
     }
-    const leaderboarddata = await leaderboardresponse.json()
-    if (!leaderboarddata.length) {
+    if (!leaderboarddata.data.length) {
       await say(`No Player in the AREDL with the name "${player}" :sad:`);
       return;
     }
-
     if (!userresponse.ok) {
       await say(`No Player in the AREDL with the name "${player}" :sad:`);
       return;
     }
-    const userdata = await userresponse.json()
-    if (!userdata.length) {
+    if (!userdata.data.length) {
       await say(`No Player in the AREDL with the name "${player}" :sad:`);
       return;
     }
@@ -321,7 +314,7 @@ app.command('/aredl-player', async ({ command, ack, say }) => {
     const created_at = userdata.data[0].created_at;
     const description = userdata.data[0].description;
     const banned = userdata.data[0].ban_level === 1 ? "Yes" : "No";
-
+    const image = leaderboarddata?.data?.[0]?.discord_avatar || 'https://lucas11.dev/cdn/null.png';
     await say({
       text: `Level: ${name})`,
       blocks: [
@@ -331,7 +324,13 @@ app.command('/aredl-player', async ({ command, ack, say }) => {
             type: "mrkdwn",
             text: `*Name:* ${name}\n*Rank:* ${rank}\n*Discord ID:* ${discord_id}\n*Hardest:* ${hardest}\n*Extremes:* ${extremes}\n*Total points:* ${total_points}\n*Created at:* ${created_at}\n*Description:* ${description}\n*Is banned?:* ${banned}`
           }
+        },
+        {
+          type: "image",
+          image_url: image,
+          alt_text: name
         }
+
       ]
   });
 }
