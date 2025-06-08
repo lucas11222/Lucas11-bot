@@ -279,7 +279,7 @@ app.command('/aredl-player', async ({ command, ack, say }) => {
   const player = command.text.trim();
 
   try {
-    const leaderboardresponse = await fetch(`https://api.aredl.net/v2/api/aredl/levels/${player}`, {
+    const leaderboardresponse = await fetch(`https://api.aredl.net/v2/api/aredl/leaderboard/${player}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
