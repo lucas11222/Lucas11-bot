@@ -219,6 +219,128 @@ catch (error) {
 }
 });
 
+app.command('/aredl-level', async ({ command, ack, say }) => {
+  await ack();
+
+  const levelid = command.text.trim();
+
+  try {
+    const response = await fetch(`https://api.aredl.net/v2/api/aredl/levels/${levelid}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      await say(`No level in the AREDL with the ID "${levelid}" :sad:`);
+      return;
+    }
+    const data = await response.json()
+    if (!data.length) {
+      await say(`No level in the AREDL with the ID "${levelid}" :sad:`);
+      return;
+    }
+    const name = data.name;
+    const requirement = data.requirement;
+    const video = data.verifications.video_url;
+    const position = data.position;
+    const verifier = data.verifications.submitted_by.global_name;
+    const creator = data.publisher.global_name;
+    const created = data.verifications.created_at;
+    const mobile = data.verifications.mobile;
+    const points = data.points;
+    const twoplayer = data.two_player;
+    const description = data.description;
+    const song = data.song;
+    const enjoyment = data.edel_enjoyment;
+    await say({
+      text: `Level: ${name} (Position:* ${position})`,
+      blocks: [
+        {
+          type: "section",
+          text: {
+            type: "mrkdwn",
+            text: `*Name:* ${name}\n*Description:* ${description}\n*Position:* ${position}\n*Song:* ${song}\n*Requirement:* ${requirement}\n*Enjoyment Rating:* ${enjoyment}\n*Video:* ${video}\n*Verifier:* ${verifier}\n*Creator:* ${creator}\n*Level ID:* ${levelid}\n*Created In:* ${created}\n*Verified in Mobile:* ${mobile}\n*Points:* ${points}\n*Is 2 player:* ${twoplayer}`
+          }
+        }
+      ]
+  });
+}
+catch (error) {
+  console.error(error);
+  await say("So that just happen :ferris-explode:.\nContact Lucas11 about this.");
+}
+});
+
+app.command('/aredl-player', async ({ command, ack, say }) => {
+  await ack();
+
+  const player = command.text.trim();
+
+  try {
+    const leaderboardresponse = await fetch(`https://api.aredl.net/v2/api/aredl/levels/${player}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    const userresponse = await fetch(`https://api.aredl.net/v2/api/aredl/levels/${player}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+
+    if (!leaderboardresponse.ok) {
+      await say(`No Player in the AREDL with the ID "${levelid}" :sad:`);
+      return;
+    }
+    const leaderboarddata = await leaderboardresponse.json()
+    if (!leaderboarddata.length) {
+      await say(`No Player in the AREDL with the ID "${levelid}" :sad:`);
+      return;
+    }
+
+    if (!userresponse.ok) {
+      await say(`No Player in the AREDL with the ID "${levelid}" :sad:`);
+      return;
+    }
+    const userdata = await userresponse.json()
+    if (!userdata.length) {
+      await say(`No Player in the AREDL with the ID "${levelid}" :sad:`);
+      return;
+    }
+    const name = leaderboarddata.data[0].user.global_name;
+    const rank = leaderboarddata.data[0].rank;
+    const discord_id = leaderboarddata.data[0].user.discord_id;
+    const hardest = leaderboarddata.data[0].hardest.name;
+    const extremes = leaderboarddata.data[0].extremes;
+    const total_points = leaderboarddata.data[0].total_points;
+    const created_at = userdata.data[0].created_at;
+    const description = userdata.data[0].description;
+    const banned = userdata.data[0].ban_level === 1 ? "Yes" : "No";
+
+    await say({
+      text: `Level: ${name})`,
+      blocks: [
+        {
+          type: "section",
+          text: {
+            type: "mrkdwn",
+            text: `*Name:* ${name}\n*Rank:* ${rank}\n*Discord ID:* ${discord_id}\n*Hardest:* ${hardest}\n*Extremes:* ${extremes}\n*Total points:* ${total_points}\n*Created at:* ${created_at}\n*Description:* ${description}\n*Is banned?:* ${banned}`
+          }
+        }
+      ]
+  });
+}
+catch (error) {
+  console.error(error);
+  await say("So that just happen :ferris-explode:.\nContact Lucas11 about this.");
+}
+});
+
 app.command('/demonlist-player', async ({ command, ack, say }) => {
   await ack();
 
@@ -272,11 +394,16 @@ app.command('/demonlist-player', async ({ command, ack, say }) => {
       ]
     });
 }
+
+
+
 catch (error) {
   console.error(error);
   await say("So that just happen :ferris-explode:.\nContact Lucas11 about this.");
 }
 });
+
+
 
 app.action("select_demon_player", async ({ body, ack, client }) => {
   await ack();
