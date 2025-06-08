@@ -285,7 +285,7 @@ app.command('/aredl-player', async ({ command, ack, say }) => {
         "Content-Type": "application/json",
       },
     });
-    const userresponse = await fetch(`https://api.aredl.net/v2/api/aredl/levels/${player}`, {
+    const userresponse = await fetch(`https://api.aredl.net/v2/api/users/${player}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
