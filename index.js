@@ -294,22 +294,22 @@ app.command('/aredl-player', async ({ command, ack, say }) => {
 
 
     if (!leaderboardresponse.ok) {
-      await say(`No Player in the AREDL with the ID "${levelid}" :sad:`);
+      await say(`No Player in the AREDL with the name "${player}" :sad:`);
       return;
     }
     const leaderboarddata = await leaderboardresponse.json()
     if (!leaderboarddata.length) {
-      await say(`No Player in the AREDL with the ID "${levelid}" :sad:`);
+      await say(`No Player in the AREDL with the name "${player}" :sad:`);
       return;
     }
 
     if (!userresponse.ok) {
-      await say(`No Player in the AREDL with the ID "${levelid}" :sad:`);
+      await say(`No Player in the AREDL with the name "${player}" :sad:`);
       return;
     }
     const userdata = await userresponse.json()
     if (!userdata.length) {
-      await say(`No Player in the AREDL with the ID "${levelid}" :sad:`);
+      await say(`No Player in the AREDL with the name "${player}" :sad:`);
       return;
     }
     const name = leaderboarddata.data[0].user.global_name;
