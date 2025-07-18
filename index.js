@@ -1,52 +1,53 @@
-const { App, client } = require('@slack/bolt');
-const { WebClient } = require('@slack/web-api');
+const { App } = require('@slack/bolt');
+const { Keyv } = require('keyv');
+const { KeyvSqlite } = require('@keyv/sqlite');
 const fs = require("fs");
-const web = new WebClient(process.env.SLACK_BOT_TOKEN);
 const itemcache = new Map();
-const pokemoncache = new Map();
 require('dotenv').config()
+
 const app = new App({
   token: process.env.SLACK_BOT_TOKEN,
   signingSecret: process.env.SLACK_SIGNING_SECRET,
   socketMode: true,
   appToken: process.env.SLACK_APP_TOKEN,
-  // Socket Mode doesn't listen on a port, but in case you want your app to respond to OAuth,
-  // you still need to listen on some port!
   port: process.env.PORT || 3000
 });
-app.command('/cheese', async ({ command, ack, say }) => {
-  // Acknowledge command request
+
+const db = new Keyv(
+  new KeyvSqlite({
+    uri: "db.sqlite",
+  })
+);
+
+app.command('/cheese', async ({ ack, say }) => {
+  // says cheese
   await ack();
 
   await say(`:-cheese:`);
 });
-app.command('/hello', async ({ command, ack, say }) => {
-  // Acknowledge command request
+app.command('/hello', async ({ ack, say }) => {
+  // says hello
   await ack();
 
   await say(`hello! :aga:`);
 });
-// Listens to incoming messages that contain "hello"
-// Listens to incoming messages that contain "hello"
-app.message("xo", async ({ message, say }) => {
-  await say({
-    blocks: [
-      {
-        type: "image",
-        image_url: "https://lucas11.dev/cdn/xo.jpg", // URL pública y accesible
-        alt_text: "XO jumpscare"
-      }
-    ],
-    text: "xo jumpscare"
-  });
-});
+
 app.message("the golden", async ({ message, client }) => {
     await client.files.uploadV2({
-      file: fs.createReadStream('./golden.mp4'), // Asegúrate de que exista
+      file: fs.createReadStream('./golden.mp4'),
       filename: 'golden.mp4',
       title: '',
       channel_id: message.channel
     });
+});
+
+app.message("congreration", async ({ message, client }) => {
+  await client.files.uploadV2({
+    file: fs.createReadStream('./congreration.mp4'),
+    filename: 'golden.mp4',
+    title: 'congreration jumpscare',
+    channel_id: message.channel
+  });
 });
 
 
@@ -523,3 +524,18 @@ app.action('button_click', async ({ body, ack, say }) => {
 
   app.logger.info('⚡️ Bolt app is running!');
 })();
+app.command("/aga-plus", async ({ command, ack, say }) => {
+  await ack();
+  const slackId = command.user_id;
+  const store = await db.get(slackId.aga);
+  if (store) {
+    await db.set(slackId.aga, [...store, ":aga:"]);
+    console.log(slackId.aga, [...store, ":aga:"])
+    await say(
+      `Here are your :agadance: ${store}`
+    );
+  } else {
+    await db.set(slackId.aga, ":aga:");
+  }
+  console.log(store)
+});
