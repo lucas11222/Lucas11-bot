@@ -1,4 +1,4 @@
-const { App } = require('@slack/bolt');
+const { App, webApi } = require('@slack/bolt');
 const { Keyv } = require('keyv');
 const { KeyvSqlite } = require('@keyv/sqlite');
 const fs = require("fs");
@@ -18,6 +18,21 @@ const db = new Keyv(
     uri: "db.sqlite",
   })
 );
+
+async function checkifbanned() {
+    try {
+      const result = await app.client.users.info({ user: process.env.USER });
+      console.log(result.user.deleted);
+      if (result.user.deleted == true) {
+         app.client.chat.postMessage({channel: C08NVR5RTJQ, text: "Lucas11 has been banned :heaviersob: See meta post for more info: https://hackclub.slack.com/archives/C0188CY57PZ/p1756395265870069"});
+      }
+      setTimeout(() => {
+        checkifbanned()
+      }, 60000);
+    } catch (error) {
+      console.error(error);
+    }
+}
 
 app.command('/cheese', async ({ ack, say }) => {
   // says cheese
@@ -523,6 +538,7 @@ app.action('button_click', async ({ body, ack, say }) => {
   await app.start();
 
   app.logger.info('⚡️ Bolt app is running!');
+  checkifbanned();
 })();
 app.command("/aga-plus", async ({ command, ack, say }) => {
   await ack();
